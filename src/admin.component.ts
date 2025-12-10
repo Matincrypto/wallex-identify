@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
 import { SubmissionService, Submission } from './submission.service';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Relationship, RELATIONSHIP_OPTIONS } from './document-requirements';
 import { DatePipe, DecimalPipe } from '@angular/common';
 
@@ -12,7 +11,6 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 })
 export class AdminComponent {
   private submissionService = inject(SubmissionService);
-  private sanitizer = inject(DomSanitizer);
 
   submissions = this.submissionService.submissions;
   selectedSubmissionId = signal<number | null>(null);
@@ -23,27 +21,34 @@ export class AdminComponent {
     return this.submissions().find(s => s.id === id) ?? null;
   });
 
-  // FIX: Refactored to use Object.keys to ensure correct type inference for `file`.
-  // `Object.entries` was incorrectly inferring the file object as `unknown`.
+  // --- تغییر مهم برای نمایش فایل‌های دریافتی از سرور ---
   selectedSubmissionFiles = computed(() => {
     const sub = this.selectedSubmission();
-    if (!sub) return [];
-    
+    if (!sub || !sub.files) return [];
+
+    // تبدیل آبجکت فایل‌ها به لیستی قابل نمایش
     return Object.keys(sub.files).map((docId) => {
-      const file = sub.files[docId];
+      const fileUrl = sub.files[docId]; // الان این یک لینک است (http://...)
+
+      // استخراج نام فایل از انتهای لینک برای نمایش زیباتر
+      const fileName = fileUrl.split('/').pop() || docId;
+
+      // تشخیص اینکه آیا فایل عکس است یا خیر (برای نمایش دکمه پیش‌نمایش)
+      const isImage = fileUrl.match(/\.(jpeg|jpg|png|gif|webp)$/i);
+
       return {
         docId,
-        file,
-        isImage: file.type.startsWith('image/'),
-        url: this.createSafeObjectUrl(file),
+        name: fileName,
+        isImage: !!isImage,
+        url: fileUrl, // لینک مستقیم برای باز کردن یا دانلود
       };
     });
   });
-  
+
   getRelationshipName(id: Relationship): string {
     return RELATIONSHIP_OPTIONS.find(opt => opt.id === id)?.name || 'ناشناخته';
   }
-  
+
   viewDetails(submission: Submission): void {
     this.selectedSubmissionId.set(submission.id);
   }
@@ -60,10 +65,5 @@ export class AdminComponent {
   reject(id: number): void {
     this.submissionService.updateStatus(id, 'Rejected');
     this.closeDetails();
-  }
-  
-  private createSafeObjectUrl(file: File): SafeUrl {
-    const url = URL.createObjectURL(file);
-    return this.sanitizer.bypassSecurityTrustUrl(url);
   }
 }
