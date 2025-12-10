@@ -21,29 +21,31 @@ export class AdminComponent {
     return this.submissions().find(s => s.id === id) ?? null;
   });
 
-  // --- تغییر مهم برای نمایش فایل‌های دریافتی از سرور ---
+  // --- بخش مهم: این قسمت باید برای خواندن لینک‌ها تنظیم شده باشد ---
   selectedSubmissionFiles = computed(() => {
     const sub = this.selectedSubmission();
     if (!sub || !sub.files) return [];
 
-    // تبدیل آبجکت فایل‌ها به لیستی قابل نمایش
+    // تبدیل آبجکت فایل‌ها به آرایه برای نمایش
     return Object.keys(sub.files).map((docId) => {
-      const fileUrl = sub.files[docId]; // الان این یک لینک است (http://...)
+      const url = sub.files[docId]; // الان url یک متن است ("/uploads/...")
 
-      // استخراج نام فایل از انتهای لینک برای نمایش زیباتر
+      // اگر url یک آبجکت بود (کد قدیمی)، تبدیل به متن کن
+      const fileUrl = typeof url === 'string' ? url : '';
+
+      // استخراج نام فایل
       const fileName = fileUrl.split('/').pop() || docId;
-
-      // تشخیص اینکه آیا فایل عکس است یا خیر (برای نمایش دکمه پیش‌نمایش)
       const isImage = fileUrl.match(/\.(jpeg|jpg|png|gif|webp)$/i);
 
       return {
         docId,
         name: fileName,
         isImage: !!isImage,
-        url: fileUrl, // لینک مستقیم برای باز کردن یا دانلود
+        url: fileUrl,
       };
     });
   });
+  // -------------------------------------------------------------
 
   getRelationshipName(id: Relationship): string {
     return RELATIONSHIP_OPTIONS.find(opt => opt.id === id)?.name || 'ناشناخته';
