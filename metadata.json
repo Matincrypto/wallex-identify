@@ -1,0 +1,5 @@
+{
+  "name": " Wallex Identity Verification",
+  "description": "An application to guide users whose accounts have been restricted due to third-party use through the identity verification and document submission process.",
+  "requestFramePermissions": []
+}

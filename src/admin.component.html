@@ -1,0 +1,96 @@
+
+<div class="container mx-auto p-4 md:p-8 bg-gray-50 min-h-[calc(100vh-68px)]">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">پنل ادمین - بررسی مدارک</h1>
+
+  @if (submissions().length === 0) {
+    <div class="text-center py-16 bg-white rounded-lg shadow">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">هیچ درخواستی ثبت نشده است</h3>
+      <p class="mt-1 text-sm text-gray-500">درخواست‌های جدید کاربران در اینجا نمایش داده می‌شوند.</p>
+    </div>
+  } @else {
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ ثبت</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ایمیل کاربر</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نسبت کاربر</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (submission of submissions(); track submission.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ submission.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ submission.submissionDate | date:'yyyy/MM/dd HH:mm' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ submission.email }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getRelationshipName(submission.relationship) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [class.bg-yellow-100]="submission.status === 'Pending'"
+                    [class.text-yellow-800]="submission.status === 'Pending'"
+                    [class.bg-green-100]="submission.status === 'Approved'"
+                    [class.text-green-800]="submission.status === 'Approved'"
+                    [class.bg-red-100]="submission.status === 'Rejected'"
+                    [class.text-red-800]="submission.status === 'Rejected'">
+                    {{ submission.status === 'Pending' ? 'در انتظار' : (submission.status === 'Approved' ? 'تایید شده' : 'رد شده') }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button (click)="viewDetails(submission)" class="text-indigo-600 hover:text-indigo-900">مشاهده جزئیات</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Details Modal -->
+@if (selectedSubmission(); as submission) {
+  <div class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center" (click)="closeDetails()">
+    <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white" (click)="$event.stopPropagation()">
+      <div class="flex justify-between items-center pb-3 border-b">
+        <h3 class="text-xl font-bold text-gray-900">جزئیات درخواست #{{ submission.id }}</h3>
+        <button (click)="closeDetails()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="mt-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="bg-gray-50 p-3 rounded-md"><span class="font-semibold text-gray-500">تاریخ:</span> {{ submission.submissionDate | date:'fullDate' }} ساعت {{ submission.submissionDate | date:'shortTime' }}</div>
+            <div class="bg-gray-50 p-3 rounded-md"><span class="font-semibold text-gray-500">ایمیل کاربر:</span> {{ submission.email }}</div>
+            <div class="bg-gray-50 p-3 rounded-md"><span class="font-semibold text-gray-500">نسبت:</span> {{ getRelationshipName(submission.relationship) }}</div>
+            <div class="bg-gray-50 p-3 rounded-md"><span class="font-semibold text-gray-500">شناسنامه قدیمی:</span> {{ submission.hasOldShenasname ? 'بله' : 'خیر' }}</div>
+            <div class="bg-gray-50 p-3 rounded-md col-span-2"><span class="font-semibold text-gray-500">وضعیت:</span> {{ submission.status }}</div>
+        </div>
+        
+        <h4 class="font-bold mt-6 mb-3 text-gray-700">فایل‌های بارگذاری شده</h4>
+        <div class="border rounded-lg p-3 space-y-2 max-h-60 overflow-y-auto">
+            @for (fileInfo of selectedSubmissionFiles(); track fileInfo.docId) {
+              <div class="flex items-center justify-between p-2 hover:bg-gray-100 rounded">
+                <span class="font-mono text-sm text-gray-600">{{ fileInfo.file.name }} ({{ fileInfo.file.size / 1024 | number:'1.0-2' }} KB)</span>
+                @if (fileInfo.isImage) {
+                  <a [href]="fileInfo.url" target="_blank" class="text-sm text-blue-600 hover:underline">پیش‌نمایش</a>
+                }
+              </div>
+            }
+        </div>
+
+      </div>
+      <div class="flex items-center justify-end pt-5 mt-5 border-t gap-3">
+        <button (click)="reject(submission.id)" class="px-6 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">رد کردن</button>
+        <button (click)="approve(submission.id)" class="px-6 py-2 bg-green-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">تایید کردن</button>
+        <button (click)="closeDetails()" class="px-6 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">بستن</button>
+      </div>
+    </div>
+  </div>
+}

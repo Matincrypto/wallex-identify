@@ -1,0 +1,225 @@
+<div class="min-h-screen bg-slate-100 p-4 flex items-center justify-center">
+  <div class="w-full max-w-2xl bg-white shadow-xl rounded-2xl overflow-hidden">
+    <div class="px-6 py-5 md:px-10 md:py-8">
+
+      <!-- Header -->
+      <header class="flex items-start justify-between pb-6 border-b border-gray-200">
+        <div class="flex items-center gap-4">
+           <div class="text-blue-600 bg-blue-100 p-2 rounded-full">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+           </div>
+           <div>
+              <h1 class="text-xl md:text-2xl font-bold text-gray-800">فرم رفع محدودیت حساب کاربری</h1>
+              <p class="text-gray-500 mt-1 text-sm">جهت رفع محدودیت حساب کاربری خود، لطفا مراحل زیر را دنبال کنید.</p>
+           </div>
+        </div>
+      </header>
+
+      <!-- Progress Bar -->
+      @if (currentStep() <= totalSteps) {
+        <div class="flex items-center justify-center px-0 md:px-4 my-8">
+          @for(stepTitle of stepTitles; track stepTitle; let i = $index) {
+            <div class="flex items-center" [class.text-blue-600]="currentStep() >= i + 1" [class.text-gray-500]="currentStep() < i + 1">
+              <div class="relative flex flex-col items-center">
+                <div class="rounded-full transition duration-500 ease-in-out h-8 w-8 flex items-center justify-center border-2" [class.border-blue-600]="currentStep() >= i + 1" [class.border-gray-300]="currentStep() < i + 1" [class.bg-blue-600]="currentStep() > i + 1" [class.text-white]="currentStep() > i + 1">
+                  @if(currentStep() > i + 1) {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  } @else {
+                    <span class="font-semibold text-sm">{{ i + 1 }}</span>
+                  }
+                </div>
+                 <div class="absolute top-0 text-center mt-10 w-32 text-xs font-medium uppercase" [class.text-gray-700]="currentStep() >= i+1">{{ stepTitle }}</div>
+              </div>
+            </div>
+            @if (!$last) {
+              <div class="flex-auto border-t-2 transition duration-500 ease-in-out mx-4" [class.border-blue-600]="currentStep() > i + 1" [class.border-gray-300]="currentStep() <= i + 1"></div>
+            }
+          }
+        </div>
+      }
+
+      <!-- Main Content -->
+      <main class="mt-20">
+        @switch (currentStep()) {
+          @case (1) {
+            <!-- Step 1: Email Input -->
+            <div class="animate-fade-in text-center">
+              <h2 class="text-xl font-bold text-gray-700 mb-2">به فرآیند احراز هویت والکس خوش آمدید</h2>
+               <p class="text-gray-600 mb-8 max-w-xl mx-auto">
+                برای شروع، لطفا آدرس ایمیلی که با آن در صرافی والکس ثبت‌نام کرده‌اید را وارد کنید.
+              </p>
+              <div class="max-w-md mx-auto">
+                 <label for="email" class="block text-sm font-medium text-gray-700 text-right mb-1">آدرس ایمیل</label>
+                 <input type="email" id="email" name="email" [value]="email()" (input)="email.set($event.target.value)" placeholder="you@example.com" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center" />
+              </div>
+              <button (click)="nextStep()" [disabled]="!isEmailValid()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100 mt-8">
+                ادامه
+              </button>
+            </div>
+          }
+          @case (2) {
+            <!-- Step 2: Relationship Selection -->
+            <div class="animate-fade-in">
+              <h2 class="text-xl font-bold text-gray-700 mb-2">چه کسی از حساب شما استفاده کرده است؟</h2>
+              <p class="text-gray-500 mb-6">لطفا نسبت فردی که از حساب کاربری شما استفاده کرده است را مشخص کنید.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @for (option of relationshipOptions; track option.id) {
+                  <button (click)="selectRelationship(option.id)" class="w-full text-right p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition duration-300 flex items-center justify-between">
+                    <span class="font-semibold">{{ option.name }}</span>
+                    <svg class="w-6 h-6 text-gray-400 -scale-x-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                  </button>
+                }
+              </div>
+              <div class="mt-8 flex justify-start">
+                <button (click)="prevStep()" class="text-gray-600 hover:text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300">
+                  بازگشت
+                </button>
+              </div>
+            </div>
+          }
+          @case (3) {
+            <!-- Step 3: Document Upload -->
+            <div class="animate-fade-in">
+              <h2 class="text-xl font-bold text-gray-700 mb-2">بارگذاری مدارک</h2>
+              <p class="text-gray-500 mb-6">لطفا مدارک مورد نیاز زیر را با فرمت‌های مجاز (JPG, PNG, PDF) بارگذاری کنید.</p>
+
+              <!-- Handwritten Note -->
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+                <h3 class="font-bold text-gray-800">متن دست‌نوشته برای تصویر احراز هویت</h3>
+                <p class="text-gray-600 my-3 whitespace-pre-wrap font-mono text-sm leading-relaxed">{{ handwrittenNote }}</p>
+                <button (click)="copyNote()" class="bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-md text-sm hover:bg-blue-200 transition">
+                  {{ copied() ? 'کپی شد!' : 'کپی کردن متن' }}
+                </button>
+              </div>
+
+              <!-- Document List -->
+              <div class="space-y-4">
+                @for(doc of requiredDocs(); track doc.id) {
+                  <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-700">{{ doc.title }}</h3>
+                    <p class="text-sm text-gray-500 mb-3">{{ doc.description }}</p>
+                    
+                    @if (files()[doc.id]) {
+                      <div class="flex items-center justify-between bg-green-50 text-green-800 p-3 rounded-md">
+                        <div class="flex items-center min-w-0">
+                          <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                          <span class="text-sm font-medium truncate">{{ getFileName(doc.id) }}</span>
+                        </div>
+                        <button (click)="removeFile(doc.id)" class="text-green-600 hover:text-green-800 flex-shrink-0 ml-2">
+                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        </button>
+                      </div>
+                    } @else {
+                      <label class="w-full flex items-center px-4 py-3 bg-white text-blue-600 rounded-lg shadow-sm tracking-wide border border-blue-200 cursor-pointer hover:bg-blue-500 hover:text-white transition">
+                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4 4-4-4h3V9h2v2z" /></svg>
+                        <span class="font-medium text-sm">انتخاب فایل</span>
+                        <input type='file' class="hidden" (change)="onFileChange($event, doc.id)" accept="image/png, image/jpeg, application/pdf" />
+                      </label>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Old Shenasname Checkbox -->
+              <div class="mt-6 bg-yellow-50 border-r-4 border-yellow-400 p-4">
+                <div class="flex">
+                    <div class="py-1">
+                      <svg class="h-6 w-6 text-yellow-500 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                      </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">نکته مهم در مورد شناسنامه قدیمی</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                          <label for="old_shenasname" class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="old_shenasname" [checked]="hasOldShenasname()" (change)="toggleOldShenasname($event)" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                            <span class="mr-2">شناسنامه من یا فرد استفاده کننده قدیمی است و نیاز به بارگذاری مدرک هویتی جایگزین (مانند گواهینامه، کارت پایان خدمت، ...) دارم.</span>
+                          </label>
+                        </div>
+                    </div>
+                </div>
+              </div>
+
+
+              <div class="mt-8 flex justify-between">
+                <button (click)="prevStep()" class="text-gray-600 hover:text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300">
+                  بازگشت
+                </button>
+                <button (click)="nextStep()" [disabled]="!allRequiredFilesUploaded()" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100">
+                  ادامه
+                </button>
+              </div>
+            </div>
+          }
+          @case (4) {
+            <!-- Step 4: Review and Submit -->
+            <div class="animate-fade-in">
+              <h2 class="text-xl font-bold text-gray-700 mb-2">بازبینی و ارسال نهایی</h2>
+              <p class="text-gray-500 mb-6">لطفا اطلاعات و مدارک بارگذاری شده را بررسی کرده و در صورت صحت، درخواست خود را ثبت نهایی کنید.</p>
+
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 space-y-4">
+                <div>
+                  <h3 class="font-semibold text-sm text-gray-500">ایمیل ثبت شده:</h3>
+                  <p class="font-bold text-lg text-blue-700">{{ email() }}</p>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-sm text-gray-500">شخص استفاده کننده از حساب:</h3>
+                  <p class="font-bold text-lg text-blue-700">{{ getRelationshipName(selectedRelationship()) }}</p>
+                </div>
+
+                <div>
+                  <h3 class="font-semibold text-sm text-gray-500">مدارک بارگذاری شده:</h3>
+                  <ul class="list-disc list-inside mt-2 text-gray-700 space-y-2">
+                    @for(doc of requiredDocs(); track doc.id) {
+                      <li class="flex items-center min-w-0">
+                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span class="flex-shrink-0">{{ doc.title }}: </span>
+                        <span class="font-mono text-sm bg-gray-200 px-2 py-1 rounded-md ml-2 truncate">{{ getFileName(doc.id) }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+
+              </div>
+
+              <div class="mt-8 flex justify-between">
+                <button (click)="prevStep()" [disabled]="isSubmitting()" class="text-gray-600 hover:text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 disabled:opacity-50">
+                  بازگشت
+                </button>
+                <button (click)="submit()" [disabled]="isSubmitting()" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-wait disabled:scale-100 flex items-center justify-center min-w-[180px]">
+                    @if(isSubmitting()) {
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>در حال ارسال...</span>
+                    } @else {
+                      <span>ثبت نهایی و ارسال درخواست</span>
+                    }
+                </button>
+              </div>
+            </div>
+          }
+          @default {
+            <!-- Success Step -->
+            <div class="animate-fade-in text-center py-10">
+              <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-800 mb-2">درخواست شما با موفقیت ثبت شد!</h2>
+              <p class="text-gray-600 mb-8">
+                مدارک شما برای تیم پشتیبانی والکس ارسال شد. نتیجه بررسی از طریق ایمیل به اطلاع شما خواهد رسید.
+              </p>
+              <button (click)="startOver()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105">
+                شروع مجدد
+              </button>
+            </div>
+          }
+        }
+      </main>
+
+    </div>
+  </div>
+</div>
