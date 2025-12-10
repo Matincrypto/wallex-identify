@@ -22,8 +22,7 @@ export class SubmissionService {
   
   // آدرس API بک‌اند (لوکال)
   // نکته: وقتی پروژه روی سرور رفت، باید این آدرس را به دامنه واقعی تغییر دهیم
-  private apiUrl = 'http://localhost:3001/api/submissions';
-
+  private apiUrl = '/api/submissions';
   private submissionsState = signal<Submission[]>([]);
   readonly submissions = this.submissionsState.asReadonly();
 
